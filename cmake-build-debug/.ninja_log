@@ -1,0 +1,6 @@
+# ninja log v5
+0	870	1658577218000000000	CMakeFiles/new_json.dir/srcs/json.cpp.o	863f8bb2234660f6
+1	871	1658577218000000000	CMakeFiles/new_json.dir/srcs/parse.cpp.o	7d56509d77005e8a
+0	889	1658577218000000000	CMakeFiles/new_json.dir/srcs/main.cpp.o	8f6e74f04730b5ae
+1	526	1658577265000000000	CMakeFiles/new_json.dir/srcs/json.cpp.o	863f8bb2234660f6
+526	578	1658577265000000000	new_json	1a577ab5cedb7655
