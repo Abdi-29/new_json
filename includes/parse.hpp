@@ -50,12 +50,13 @@ public:
 	void	parse();
 	Json	*parseObject(Json *node);
 	void	parseArray(Json *node);
-	void	rollBackToken();
 	Json	parseString();
 	Json	parseNumber();
 	Json	parseList();
 	Json	parseBoolean();
 	Json	parseNull();
+
+    Json    *getState(std::istream &file);
 };
 
 #endif

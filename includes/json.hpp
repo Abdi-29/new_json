@@ -15,7 +15,7 @@ using jsonList = std::vector<Json*>;
 class Json
 {
 public:
-	enum Type
+	enum Token
 	{
 		STRING,
 		NUMBER,
@@ -25,8 +25,8 @@ public:
 		NULL_TYPE
 	};
 public:
-	Type type;
-	struct values
+	Token type;
+	union values
 	{
 		values() {}
 		jsonList	*list;
@@ -38,6 +38,7 @@ public:
 	}		values;
 
 public:
+	Json() {}
 	Json(std::istream& file);
 	~Json();
 };
