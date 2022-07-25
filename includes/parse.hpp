@@ -40,6 +40,7 @@ public:
 	void	skipWhiteSpaces() {
 		_file >> std::ws;
 	}
+	std::string parseName(std::istream& file);
 
 public:
 	Parse();
@@ -48,15 +49,16 @@ public:
 
 public:
 	void	parse();
-	Json	*parseObject(Json *node);
-	void	parseArray(Json *node);
-	Json	parseString();
-	Json	parseNumber();
-	Json	parseList();
-	Json	parseBoolean();
-	Json	parseNull();
+	void 	whichState(std::istream& file);
+	Json	*parseObject(std::istream& file);
+	Json	*parseArray(std::istream& file);
+	Json	*parseString(std::istream& file);
+	Json	*parseNumber(std::istream& file);
+	Json	*parseBoolean(std::istream& file);
+	Json	*parseNull(std::istream& file);
+	Json	*parseList(std::istream& file);
 
-    Json    *getState(std::istream &file);
+	Json::Token    getState(std::istream &file);
 };
 
 #endif

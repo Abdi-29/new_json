@@ -26,7 +26,7 @@ public:
 	};
 public:
 	Token type;
-	union values
+	struct values
 	{
 		values() {}
 		jsonList	*list;
