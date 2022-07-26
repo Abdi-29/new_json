@@ -75,65 +75,45 @@ void Parse::whichState(std::istream& file) {
 Json *Parse::parseObject(std::istream& file) {
 	std::cout << "parsing Object" << std::endl;
 	Json *node = new Json;
-	char c = _file.get();
-	skipWhiteSpaces();
-	switch (c) {
-		case '{':
+	char c;
+	while (1) {
+		c = file.get();
+		skipWhiteSpaces();
+		if (c == '{')
+		{
+			state.emplace(c);
 			node->values.str = parseName(file);
-			break;
-		case '}':
-			node->values.object.emplace(node->values.str, node);
-			break;
-		case ',': {
-			_file.get();
-			node = parseObject(file);
+			node = parse_one();
+		} else if (state.top() == '}') {
+//			file.get();
+			return node;
+		} else if (c == ',') {
+			node = parse_one();
 		}
 	}
-	return node;
 }
 
 Json *Parse::parseArray(std::istream& file) {
 	std::cout << "parse array" << std::endl;
 	Json *node = new Json;
-	char c = _file.get();
-	skipWhiteSpaces();
-	switch (c) {
-		case '[':
-			if (_file.peek() == '{')
-				return parseObject(file);
-			return parseList(file);
-			break;
-		case ']':
-//			node->values.object.emplace(node->values.str, node);
-			break;
-		case ',':
-			_file.get();
-	}
-	return node;
-}
-
-Json *Parse::parseList(std::istream &file) {
-	while (file.peek() != ']')
-	{
-		char c = file.peek();
-		std::cout << "CCCCCCCCCC " << c << std::endl;
-		switch (c) {
-			case 't':
-			case 'f':
-				return parseBoolean(file);
-			case '"':
-				return parseString(file);
-			default: {
-				if (c == '-' || isdigit(c))
-					return parseNumber(file);
-				else {
-					std::cout << "error11" << std::endl;
-					exit(0);
-				}
-			}
+	char c;
+	while (1) {
+		c = _file.get();
+		skipWhiteSpaces();
+		if (c == '[')
+		{
+			state.emplace(c);
+			node = parse_one();
+		} else if (state.top() == '[' && c == ']') {
+			state.pop();
+			return node;
+		} else if (c == ',') {
+			node = parse_one();
 		}
+		std::cout << state.top() << std::endl;
 	}
-	return NULL;
+	std::cout << "errrrrrrror" << std::endl;
+	return node;
 }
 
 Json *Parse::parseString(std::istream& file) {
@@ -162,49 +142,50 @@ Json *Parse::parseBoolean(std::istream& file) {
 		if (str != "false")
 			std::cout << "trow an error" << std::endl;
 	}
-	file.get();
+	skipWhiteSpaces();
 	(str == "true") ? node->values.boolean = true : node->values.boolean = false;
 	return node;
 }
 
 Json *Parse::parseNull(std::istream& file) {
+	std::cout << "parsing null" << std::endl;
 	Json *node = new Json;
 	std::string str;
 	while (file.peek() != '\n')
 		str += file.get();
+	skipWhiteSpaces();
 	node->values.str = "null";
-	node->values.list->push_back(node);
+	node->values.list.push_back(node);
 	return node;
 }
 
 void Parse::parse() {
     std::cout << "----START-----" << std::endl;
-	Json *node;
     while (hasMoreToken())
 	{
-        char c = getState(_file);
-		std::cout << "TYPE " << (int)c << std::endl;
-		switch (c) {
-			case Json::NUMBER:
-				parseNumber(_file);
-				break;
-			case Json::BOOLEAN:
-				node = parseBoolean(_file);
-				break;
-			case Json::ARRAY:
-				node = parseArray(_file);
-				break;
-			case Json::OBJECT:
-				node = parseObject(_file);
-				break;
-			case Json::NULL_TYPE:
-				node = parseNull(_file);
-				break;
-			case Json::STRING:
-				node = parseString(_file);
-		}
-		node->values.object.emplace(node->values.str, node);
+		parse_one();
 	}
+}
+
+Json *Parse::parse_one()
+{
+	char c = getState(_file);
+	std::cout << "TYPE " << (int)c << std::endl;
+	switch (c) {
+		case Json::NUMBER:
+			return parseNumber(_file);
+		case Json::BOOLEAN:
+			return parseBoolean(_file);
+		case Json::ARRAY:
+			return parseArray(_file);
+		case Json::OBJECT:
+			return parseObject(_file);
+		case Json::NULL_TYPE:
+			return parseNull(_file);
+		case Json::STRING:
+			return parseString(_file);
+	}
+	return NULL;
 }
 
 

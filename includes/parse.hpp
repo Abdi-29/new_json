@@ -34,6 +34,7 @@ private:
 
 public:
 	Type	getToken();
+	std::stack<char> state;
 	bool	hasMoreToken() {
 		return !_file.eof();
 	}
@@ -49,6 +50,7 @@ public:
 
 public:
 	void	parse();
+	Json	*parse_one();
 	void 	whichState(std::istream& file);
 	Json	*parseObject(std::istream& file);
 	Json	*parseArray(std::istream& file);

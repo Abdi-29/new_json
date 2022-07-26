@@ -29,7 +29,7 @@ public:
 	struct values
 	{
 		values() {}
-		jsonList	*list;
+		jsonList	list;
 		jsonObject	object;
 		std::string str;
 		int			number;
