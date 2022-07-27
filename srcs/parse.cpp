@@ -79,17 +79,17 @@ Json *Parse::parseObject(std::istream& file) {
 	while (1) {
 		c = file.get();
 		skipWhiteSpaces();
-		if (c == '{')
-		{
+		if (c == '{') {
 			state.emplace(c);
 			node->values.str = parseName(file);
 			node = parse_one();
 		} else if (state.top() == '}') {
-//			file.get();
 			return node;
 		} else if (c == ',') {
+			node->values.str = parseName(file);
 			node = parse_one();
 		}
+		skipWhiteSpaces();
 	}
 }
 
@@ -98,10 +98,9 @@ Json *Parse::parseArray(std::istream& file) {
 	Json *node = new Json;
 	char c;
 	while (1) {
-		c = _file.get();
+		c = file.get();
 		skipWhiteSpaces();
-		if (c == '[')
-		{
+		if (c == '[') {
 			state.emplace(c);
 			node = parse_one();
 		} else if (state.top() == '[' && c == ']') {
@@ -110,10 +109,9 @@ Json *Parse::parseArray(std::istream& file) {
 		} else if (c == ',') {
 			node = parse_one();
 		}
+		skipWhiteSpaces();
 		std::cout << state.top() << std::endl;
 	}
-	std::cout << "errrrrrrror" << std::endl;
-	return node;
 }
 
 Json *Parse::parseString(std::istream& file) {
@@ -156,6 +154,7 @@ Json *Parse::parseNull(std::istream& file) {
 	skipWhiteSpaces();
 	node->values.str = "null";
 	node->values.list.push_back(node);
+	skipWhiteSpaces();
 	return node;
 }
 
