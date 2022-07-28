@@ -50,27 +50,6 @@ std::string Parse::parseName(std::istream &file) {
 	return str;
 }
 
-void Parse::whichState(std::istream& file) {
-	char c = file.get();
-	switch (c) {
-		case '"':
-			parseName(file);
-		case 't':
-		case 'f':
-			parseBoolean(file);
-		case 'n':
-			parseNull(file);
-		default: {
-			if (c == '-' || isdigit(c))
-				parseNumber(file);
-			else {
-				std::cout << "error11" << std::endl;
-				exit(0);
-			}
-		}
-	}
-}
-
 Json *Parse::parseObject(std::istream& file) {
 	std::cout << "parsing Object" << std::endl;
 	Json *node = new Json;
