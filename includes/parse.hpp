@@ -50,17 +50,27 @@ public:
 
 public:
 	void	parse();
+
 	Json	*parse_one();
-	void 	whichState(std::istream& file);
 	Json	*parseObject(std::istream& file);
 	Json	*parseArray(std::istream& file);
 	Json	*parseString(std::istream& file);
 	Json	*parseNumber(std::istream& file);
 	Json	*parseBoolean(std::istream& file);
 	Json	*parseNull(std::istream& file);
-	Json	*parseList(std::istream& file);
 
 	Json::Token    getState(std::istream &file);
+
+public:
+	class wrongToken: public std::exception {
+	private:
+		std::string _msg;
+	public:
+		wrongToken(const std::string& msg) : _msg(msg) {}
+		virtual const char* what() const throw() {
+			return _msg.c_str();
+		}
+	};
 };
 
 #endif

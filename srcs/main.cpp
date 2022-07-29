@@ -5,7 +5,12 @@ int main(int argc, char **argv) {
 		std::cout << "error" << std::endl;
 		return 1;
 	}
-	std::ifstream file(argv[1]);
-	Json json(file);
+	try {
+		std::ifstream file(argv[1]);
+		Json json(file);
+	}
+	catch (std::exception const &e) {
+		std::cerr << e.what() << std::endl;
+	}
 	return 0;
 }

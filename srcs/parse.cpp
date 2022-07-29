@@ -20,14 +20,12 @@ Json::Token Parse::getState(std::istream& file) {
 			return Json::Token::OBJECT;
 		case 'n':
 			return Json::Token::NULL_TYPE;
-		default: {
+		default:
 			if (type == '-' || isdigit(type))
 				return Json::Token::NUMBER;
 			else {
-				std::cout << "error11" << std::endl;
-				exit(0);
+				throw wrongToken("invalid token");
 			}
-		}
     }
 }
 
@@ -35,8 +33,7 @@ std::string Parse::parseName(std::istream &file) {
 	std::string str;
 	char c = file.get();
 	if (c != '"') {
-		std::cout << "error testing" << std::endl;
-		exit(1);
+		throw wrongToken("invalid name");
 	}
 	auto done  =  [] (char c) { return c != '"'; };
 	while (done(file.peek()))
@@ -44,8 +41,7 @@ std::string Parse::parseName(std::istream &file) {
 	file.get();
 	skipWhiteSpaces();
 	if (file.get() != ':') {
-		std::cout << "error testing" << std::endl;
-		exit(1);
+		throw wrongToken("it has to be a column after name");
 	}
 	return str;
 }
@@ -103,10 +99,8 @@ Json *Parse::parseArray(std::istream& file) {
 Json *Parse::parseString(std::istream& file) {
 	Json *node = new Json;
 	std::string str;
-	assert(file.get());
 	while (file.peek() != '"')
 		str += file.get();
-	assert(file.get());
 	node->values.str = str;
 	node->type = Json::STRING;
 	return node;
@@ -119,6 +113,8 @@ Json *Parse::parseNumber(std::istream& file) {
 		str += file.get();
 	while (isdigit(file.peek()))
 		str += file.get();
+	node->values.number = std::stoi(str);
+	node->type = Json::NUMBER;
 	skipWhiteSpaces();
 	return node;
 }
@@ -130,15 +126,13 @@ Json *Parse::parseBoolean(std::istream& file) {
 	if (file.peek() == 't') {
 		file.get(correct, sizeof(correct));
 		if (std::memcmp("true", correct, 4) != 0) {
-			std::cout << "error testing" << std::endl;
-			exit(0);
+			throw wrongToken("error true boolean");
 		}
 		node->values.boolean = true;
 	} else {
 		file.get(wrong, sizeof(wrong));
 		if (std::memcmp("false", wrong, 5) != 0) {
-			std::cout << "error testing" << std::endl;
-			exit(0);
+			throw wrongToken("error false boolean");
 		}
 		node->values.boolean = false;
 	}
@@ -153,19 +147,18 @@ Json *Parse::parseNull(std::istream& file) {
 	char str[5];
 	file.get(str, sizeof(str));
 	if (std::memcmp("null", str, 4) != 0) {
-		std::cout << "error testing" << std::endl;
-		exit(0);
+		throw wrongToken("error null");
 	}
 	node->values.str = str;
-	node->values.list.push_back(node);
+	node->type = Json::NULL_TYPE;
+//	node->values.list.push_back(node);
 	skipWhiteSpaces();
 	return node;
 }
 
 void Parse::parse() {
     std::cout << "----START-----" << std::endl;
-    while (hasMoreToken())
-	{
+    while (hasMoreToken()) {
 		parse_one();
 	}
 	std::cout << "-----DONE--------" << std::endl;
@@ -186,10 +179,9 @@ Json *Parse::parse_one()
 			return parseObject(_file);
 		case Json::NULL_TYPE:
 			return parseNull(_file);
-		case Json::STRING:
+		default:
 			return parseString(_file);
 	}
-	return NULL;
 }
 
 
