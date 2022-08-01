@@ -7,7 +7,6 @@
 class Parse
 {
 private:
-	std::istream	&_file;
 //	Json			json;
 
 private:
@@ -35,23 +34,22 @@ private:
 public:
 	Type	getToken();
 	std::stack<char> state;
-	bool	hasMoreToken() {
-		return !_file.eof();
+	bool	hasMoreToken(std::istream& file) {
+		return !file.eof();
 	}
-	void	skipWhiteSpaces() {
-		_file >> std::ws;
+	void	skipWhiteSpaces(std::istream& file) {
+		file >> std::ws;
 	}
 	std::string parseName(std::istream& file);
 
 public:
 	Parse();
-	Parse(std::istream& file);
 	~Parse();
 
 public:
-	void	parse();
-
-	Json	*parse_one();
+	Json*	parse(std::istream& file);
+private:
+	Json	*parse_one(std::istream& file);
 	Json	*parseObject(std::istream& file);
 	Json	*parseArray(std::istream& file);
 	Json	*parseString(std::istream& file);

@@ -1,15 +1,13 @@
 #include "../includes/parse.hpp"
 
-Parse::Parse(std::istream& file) : _file(file) {
-	parse();
-}
+Parse::Parse() {}
 
 Json::Token Parse::getState(std::istream& file) {
-    skipWhiteSpaces();
+    skipWhiteSpaces(file);
     char type = file.peek();
 	std::cout << type << std::endl;
     switch (type) {
-        case '"':
+		case '"':
 			return Json::Token::STRING;
 		case 't':
 		case 'f':
@@ -39,68 +37,86 @@ std::string Parse::parseName(std::istream &file) {
 	while (done(file.peek()))
 		str += file.get();
 	file.get();
-	skipWhiteSpaces();
+	skipWhiteSpaces(file);
 	if (file.get() != ':') {
 		throw wrongToken("it has to be a column after name");
 	}
+	skipWhiteSpaces(file);
 	return str;
 }
 
 Json *Parse::parseObject(std::istream& file) {
 	std::cout << "parsing Object" << std::endl;
 	Json *node = new Json;
+	node->type = Json::Token::OBJECT;
+	std::string name;
 	char c;
-	while (1) {
+	while (file.good()) {
 		c = file.get();
-		skipWhiteSpaces();
+		skipWhiteSpaces(file);
 		if (c == '{') {
 			if (file.peek() == '}') {
 				file.get();
 				return node;
 			}
 			state.emplace(c);
-			node->values.str = parseName(file);
-			node = parse_one();
+			name = parseName(file);
+			Json* next = parse_one(file);
+			node->values.object.emplace(name, next);
 		} else if (state.top() == '{' && c == '}') {
 			state.pop();
 			return node;
 		} else if (c == ',') {
-			node->values.str = parseName(file);
-			node = parse_one();
+			name = parseName(file);
+			Json* next = parse_one(file);
+			node->values.object.emplace(name, next);
 		}
-		skipWhiteSpaces();
+		else {
+			std::cerr << "checking " << c;
+			throw wrongToken("syntax error");
+		}
+		skipWhiteSpaces(file);
 	}
+	throw wrongToken("syntax error");
 }
 
 Json *Parse::parseArray(std::istream& file) {
 	std::cout << "parse array" << std::endl;
 	Json *node = new Json;
+	node->type = Json::Token::ARRAY;
 	char c;
-	while (1) {
+	while (file.good()) {
 		c = file.get();
-		skipWhiteSpaces();
+		skipWhiteSpaces(file);
 		if (c == '[') {
 			if (file.peek() == ']') {
 				file.get();
 				return node;
 			}
 			state.emplace(c);
-			node = parse_one();
+			node->values.list.push_back(parse_one(file));
 		} else if (state.top() == '[' && c == ']') {
 			state.pop();
 			return node;
 		} else if (c == ',') {
-			node = parse_one();
+			Json* next = parse_one(file);
+			node->values.list.push_back(next);
+		} else {
+			throw wrongToken("syntax error");
 		}
-		skipWhiteSpaces();
+		skipWhiteSpaces(file);
 	}
+	throw wrongToken("syntax error");
 }
 
 Json *Parse::parseString(std::istream& file) {
 	Json *node = new Json;
 	std::string str;
+	file.ignore();
 	while (file.peek() != '"')
 		str += file.get();
+	if (file.peek() == '"')
+		file.get();
 	node->values.str = str;
 	node->type = Json::STRING;
 	return node;
@@ -115,7 +131,7 @@ Json *Parse::parseNumber(std::istream& file) {
 		str += file.get();
 	node->values.number = std::stoi(str);
 	node->type = Json::NUMBER;
-	skipWhiteSpaces();
+	skipWhiteSpaces(file);
 	return node;
 }
 
@@ -137,7 +153,7 @@ Json *Parse::parseBoolean(std::istream& file) {
 		node->values.boolean = false;
 	}
 	node->type = Json::BOOLEAN;
-	skipWhiteSpaces();
+	skipWhiteSpaces(file);
 	return node;
 }
 
@@ -152,37 +168,43 @@ Json *Parse::parseNull(std::istream& file) {
 	node->values.str = str;
 	node->type = Json::NULL_TYPE;
 //	node->values.list.push_back(node);
-	skipWhiteSpaces();
+	skipWhiteSpaces(file);
 	return node;
 }
 
-void Parse::parse() {
+Json* Parse::parse(std::istream& file) {
     std::cout << "----START-----" << std::endl;
-    while (hasMoreToken()) {
-		parse_one();
+	Json *node = nullptr;
+    if (hasMoreToken(file)) {
+		node = parse_one(file);
+	} else {
+		node = new Json();
 	}
+	if (!state.empty())
+		throw wrongToken("invalid json file");
 	std::cout << "-----DONE--------" << std::endl;
+	return node;
 }
 
-Json *Parse::parse_one()
+Json *Parse::parse_one(std::istream& file)
 {
-	char c = getState(_file);
-	std::cout << "TYPE " << (int)c << std::endl;
+	Json::Token c = getState(file);
+
+	std::cout << "TYPE: " << c << std::endl;
 	switch (c) {
 		case Json::NUMBER:
-			return parseNumber(_file);
+			return parseNumber(file);
 		case Json::BOOLEAN:
-			return parseBoolean(_file);
+			return parseBoolean(file);
 		case Json::ARRAY:
-			return parseArray(_file);
+			return parseArray(file);
 		case Json::OBJECT:
-			return parseObject(_file);
+			return parseObject(file);
 		case Json::NULL_TYPE:
-			return parseNull(_file);
+			return parseNull(file);
 		default:
-			return parseString(_file);
+			return parseString(file);
 	}
 }
-
 
 Parse::~Parse() {}

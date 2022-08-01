@@ -37,10 +37,13 @@ public:
 		~values() {}
 	}		values;
 
+	void print() const;
+
 public:
-	Json() {}
-	Json(std::istream& file);
+	Json();
 	~Json();
 };
+
+std::ostream& operator<<(std::ostream& out, const Json::Token& t);
 
 #endif
