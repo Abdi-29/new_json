@@ -5,7 +5,6 @@ Parse::Parse() {}
 Json::Token Parse::getState(std::istream& file) {
     skipWhiteSpaces(file);
     char type = file.peek();
-	std::cout << type << std::endl;
     switch (type) {
 		case '"':
 			return Json::Token::STRING;
@@ -46,7 +45,6 @@ std::string Parse::parseName(std::istream &file) {
 }
 
 Json *Parse::parseObject(std::istream& file) {
-	std::cout << "parsing Object" << std::endl;
 	Json *node = new Json;
 	node->type = Json::Token::OBJECT;
 	std::string name;
@@ -72,7 +70,6 @@ Json *Parse::parseObject(std::istream& file) {
 			node->values.object.emplace(name, next);
 		}
 		else {
-			std::cerr << "checking " << c;
 			throw wrongToken("syntax error");
 		}
 		skipWhiteSpaces(file);
@@ -81,7 +78,6 @@ Json *Parse::parseObject(std::istream& file) {
 }
 
 Json *Parse::parseArray(std::istream& file) {
-	std::cout << "parse array" << std::endl;
 	Json *node = new Json;
 	node->type = Json::Token::ARRAY;
 	char c;
@@ -113,10 +109,14 @@ Json *Parse::parseString(std::istream& file) {
 	Json *node = new Json;
 	std::string str;
 	file.ignore();
-	while (file.peek() != '"')
-		str += file.get();
-	if (file.peek() == '"')
-		file.get();
+	while (file.good()) {
+		if (file.peek() != '"') {
+			str += file.get();
+		} else
+			break;
+	}
+	if (file.get() != '"')
+		throw wrongToken("bad string");
 	node->values.str = str;
 	node->type = Json::STRING;
 	return node;
@@ -158,7 +158,6 @@ Json *Parse::parseBoolean(std::istream& file) {
 }
 
 Json *Parse::parseNull(std::istream& file) {
-	std::cout << "parsing null" << std::endl;
 	Json *node = new Json;
 	char str[5];
 	file.get(str, sizeof(str));
@@ -167,13 +166,11 @@ Json *Parse::parseNull(std::istream& file) {
 	}
 	node->values.str = str;
 	node->type = Json::NULL_TYPE;
-//	node->values.list.push_back(node);
 	skipWhiteSpaces(file);
 	return node;
 }
 
 Json* Parse::parse(std::istream& file) {
-    std::cout << "----START-----" << std::endl;
 	Json *node = nullptr;
     if (hasMoreToken(file)) {
 		node = parse_one(file);
@@ -182,7 +179,6 @@ Json* Parse::parse(std::istream& file) {
 	}
 	if (!state.empty())
 		throw wrongToken("invalid json file");
-	std::cout << "-----DONE--------" << std::endl;
 	return node;
 }
 
@@ -190,7 +186,7 @@ Json *Parse::parse_one(std::istream& file)
 {
 	Json::Token c = getState(file);
 
-	std::cout << "TYPE: " << c << std::endl;
+//	std::cout << "TYPE: " << c << std::endl;
 	switch (c) {
 		case Json::NUMBER:
 			return parseNumber(file);

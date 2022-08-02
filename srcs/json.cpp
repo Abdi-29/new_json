@@ -7,10 +7,15 @@ Json::Json() {}
 void Json::print() const {
 	switch (type) {
 		case STRING:
+			std::cout << "String ";
+			std::cout << values.str;
 			break;
 		case NUMBER:
+			std::cout << "Number ";
+			std::cout << values.number;
 			break;
 		case BOOLEAN:
+			std::cout << "boolean ";
 			std::cout << std::boolalpha << values.boolean;
 			break;
 		case ARRAY:
