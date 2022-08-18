@@ -26,9 +26,15 @@ public:
 	};
 public:
 	Token type;
-	struct values
+	union values
 	{
 		values() {}
+		values(jsonList&& list) : list(list) {}
+		values(jsonObject&& object) : object(object) {}
+		values(const std::string& str) : str(str) {}
+		values(int number) : number(number) {}
+		values(bool boolean) : boolean(boolean) {}
+
 		jsonList	list;
 		jsonObject	object;
 		std::string str;
@@ -41,6 +47,11 @@ public:
 
 public:
 	Json();
+	Json(jsonList&& list) : values(std::move(list)) {}
+	Json(jsonObject&& object) : values(std::move(object)) {}
+	Json(const std::string& str) : values(std::move(str)) {}
+	Json(int number) : values(number) {}
+	Json(bool boolean) : values(boolean) {}
 	~Json();
 };
 

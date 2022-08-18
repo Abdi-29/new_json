@@ -1,6 +1,4 @@
-#include "../includes/parse.hpp"
 #include "../includes/json.hpp"
-#include <iostream>
 
 Json::Json() {}
 
@@ -39,7 +37,6 @@ void Json::print() const {
 			break;
 	}
 }
-
 
 std::ostream& operator<<(std::ostream& out, const Json::Token& t) {
 	switch (t) {

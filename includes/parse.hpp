@@ -4,6 +4,8 @@
 #include "json.hpp"
 #include <stdlib.h>
 
+class Json;
+
 class Parse
 {
 private:
