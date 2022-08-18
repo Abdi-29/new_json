@@ -62,4 +62,24 @@ std::ostream& operator<<(std::ostream& out, const Json::Token& t) {
 	return out;
 }
 
-Json::~Json() {}
+Json::~Json() {
+	switch (type) {
+		case STRING:
+			values.str.~basic_string();
+			break;
+		case ARRAY:
+			for (const Json *x: values.list) {
+				delete x;
+			}
+			values.list.~vector();
+			break;
+		case OBJECT:
+			for (const auto &x: values.object) {
+				delete x.second;
+			}
+			values.object.~map();
+			break;
+		default:
+			break;
+	}
+}

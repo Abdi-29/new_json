@@ -164,7 +164,7 @@ Json *Parse::parseNull(std::istream& file) {
 	if (std::memcmp("null", str, 4) != 0) {
 		throw wrongToken("error null");
 	}
-	node->values.str = str;
+//	node->values.str = str;
 	node->type = Json::NULL_TYPE;
 	skipWhiteSpaces(file);
 	return node;

@@ -3,6 +3,8 @@
 
 #include "json.hpp"
 #include <stdlib.h>
+#include <cstring>
+#include <stack>
 
 class Json;
 

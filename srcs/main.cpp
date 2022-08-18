@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
 		Parse parser;
 		Json* json = parser.parse(file);
 		json->print();
+		delete json;
 	}
 	catch (std::exception const &e) {
 		std::cerr << e.what() << std::endl;
