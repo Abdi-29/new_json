@@ -33,7 +33,7 @@ std::string Parse::parseName(std::istream &file) {
 		throw wrongToken("invalid name");
 	}
 	auto done  =  [] (char c) { return c != '"'; };
-	while (done(file.peek()))
+	while (file.good() && done(file.peek()))
 		str += file.get();
 	file.get();
 	skipWhiteSpaces(file);
