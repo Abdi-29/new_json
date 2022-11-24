@@ -6,11 +6,12 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
 class Json;
 
-using jsonObject = std::map<std::string, Json*>;
-using jsonList = std::vector<Json*>;
+using jsonObject = std::map<std::string, std::unique_ptr<Json>>;
+using jsonList = std::vector<std::unique_ptr<Json>>;
 
 class Json
 {
@@ -29,8 +30,8 @@ public:
 	union values
 	{
 		values() {}
-		values(jsonList&& list) : list(list) {}
-		values(jsonObject&& object) : object(object) {}
+		values(jsonList&& list) : list(std::move(list)) {}
+		values(jsonObject&& object) : object(std::move(object)) {}
 		values(const std::string& str) : str(str) {}
 		values(int number) : number(number) {}
 		values(bool boolean) : boolean(boolean) {}

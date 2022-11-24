@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include <stack>
+#include <memory>
 
 class Json;
 
@@ -51,15 +52,15 @@ public:
 	~Parse();
 
 public:
-	Json*	parse(std::istream& file);
+    std::unique_ptr<Json>   parse(std::istream& file);
 private:
-	Json	*parse_one(std::istream& file);
-	Json	*parseObject(std::istream& file);
-	Json	*parseArray(std::istream& file);
-	Json	*parseString(std::istream& file);
-	Json	*parseNumber(std::istream& file);
-	Json	*parseBoolean(std::istream& file);
-	Json	*parseNull(std::istream& file);
+	std::unique_ptr<Json>   parse_one(std::istream& file);
+	std::unique_ptr<Json>   parseObject(std::istream& file);
+	std::unique_ptr<Json>   parseArray(std::istream& file);
+	std::unique_ptr<Json>   parseString(std::istream& file);
+	std::unique_ptr<Json>   parseNumber(std::istream& file);
+	std::unique_ptr<Json>   parseBoolean(std::istream& file);
+	std::unique_ptr<Json>   parseNull(std::istream& file);
 
 	Json::Token    getState(std::istream &file);
 

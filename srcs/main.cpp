@@ -8,9 +8,9 @@ int main(int argc, char **argv) {
 	try {
 		std::ifstream file(argv[1]);
 		Parse parser;
-		Json* json = parser.parse(file);
+        std::unique_ptr<Json>  json = parser.parse(file);
 		json->print();
-		delete json;
+        json.reset();
 	}
 	catch (std::exception const &e) {
 		std::cerr << e.what() << std::endl;

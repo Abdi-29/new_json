@@ -44,8 +44,8 @@ std::string Parse::parseName(std::istream &file) {
 	return str;
 }
 
-Json *Parse::parseObject(std::istream& file) {
-	Json *node = new Json(jsonObject());
+std::unique_ptr<Json> Parse::parseObject(std::istream& file) {
+    std::unique_ptr<Json> node = std::make_unique<Json>(jsonObject());
 	node->type = Json::Token::OBJECT;
 	std::string name;
 	char c;
@@ -59,15 +59,15 @@ Json *Parse::parseObject(std::istream& file) {
 			}
 			state.emplace(c);
 			name = parseName(file);
-			Json* next = parse_one(file);
-			node->values.object.emplace(name, next);
+            std::unique_ptr<Json> next = parse_one(file);
+			node->values.object.emplace(name, std::move(next));
 		} else if (state.top() == '{' && c == '}') {
 			state.pop();
 			return node;
 		} else if (c == ',') {
 			name = parseName(file);
-			Json* next = parse_one(file);
-			node->values.object.emplace(name, next);
+            std::unique_ptr<Json> next = parse_one(file);
+			node->values.object.emplace(name, std::move(next));
 		}
 		else
 			throw wrongToken("syntax error");
@@ -76,8 +76,8 @@ Json *Parse::parseObject(std::istream& file) {
 	throw wrongToken("syntax error");
 }
 
-Json *Parse::parseArray(std::istream& file) {
-	Json *node = new Json(jsonList());
+std::unique_ptr<Json> Parse::parseArray(std::istream& file) {
+    std::unique_ptr<Json> node = std::make_unique<Json>(jsonList());
 	node->type = Json::Token::ARRAY;
 	char c;
 
@@ -95,8 +95,8 @@ Json *Parse::parseArray(std::istream& file) {
 			state.pop();
 			return node;
 		} else if (c == ',') {
-			Json* next = parse_one(file);
-			node->values.list.push_back(next);
+            std::unique_ptr<Json> next = parse_one(file);
+			node->values.list.push_back(std::move(next));
 		} else {
 			throw wrongToken("syntax error");
 		}
@@ -105,8 +105,8 @@ Json *Parse::parseArray(std::istream& file) {
 	throw wrongToken("syntax error");
 }
 
-Json *Parse::parseString(std::istream& file) {
-	Json *node = new Json(std::string());
+std::unique_ptr<Json> Parse::parseString(std::istream& file) {
+    std::unique_ptr<Json> node = std::make_unique<Json>(std::string());
 	std::string str;
 	file.ignore();
 	while (file.good()) {
@@ -122,8 +122,8 @@ Json *Parse::parseString(std::istream& file) {
 	return node;
 }
 
-Json *Parse::parseNumber(std::istream& file) {
-	Json *node = new Json(int());
+std::unique_ptr<Json> Parse::parseNumber(std::istream& file) {
+    std::unique_ptr<Json> node = std::make_unique<Json>(int());
 	std::string str;
 	if (file.peek() == '-')
 		str += file.get();
@@ -135,8 +135,8 @@ Json *Parse::parseNumber(std::istream& file) {
 	return node;
 }
 
-Json *Parse::parseBoolean(std::istream& file) {
-	Json *node = new Json(bool());
+std::unique_ptr<Json> Parse::parseBoolean(std::istream& file) {
+    std::unique_ptr<Json> node = std::make_unique<Json>(bool());
 	char correct[5];
 	char wrong[6];
 	if (file.peek() == 't') {
@@ -157,8 +157,8 @@ Json *Parse::parseBoolean(std::istream& file) {
 	return node;
 }
 
-Json *Parse::parseNull(std::istream& file) {
-	Json *node = new Json;
+std::unique_ptr<Json> Parse::parseNull(std::istream& file) {
+    std::unique_ptr<Json> node = std::make_unique<Json>();
 	char str[5];
 	file.get(str, sizeof(str));
 	if (std::memcmp("null", str, 4) != 0) {
@@ -170,19 +170,19 @@ Json *Parse::parseNull(std::istream& file) {
 	return node;
 }
 
-Json *Parse::parse(std::istream& file) {
-	Json *node = nullptr;
+std::unique_ptr<Json> Parse::parse(std::istream& file) {
+    std::unique_ptr<Json> node = nullptr;
     if (hasMoreToken(file)) {
 		node = parse_one(file);
 	} else {
-		node = new Json();
+		node = std::make_unique<Json>();
 	}
 	if (!state.empty())
 		throw wrongToken("invalid json file");
 	return node;
 }
 
-Json *Parse::parse_one(std::istream& file) {
+std::unique_ptr<Json> Parse::parse_one(std::istream& file) {
 	Json::Token c = getState(file);
 
 	switch (c) {

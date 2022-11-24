@@ -8,7 +8,7 @@ INCLUDE = -I ./includes
 OBJ = $(SRC:%.cpp=%.o)
 
 
-CFLAGS = -Wall -Werror -Wextra -std=c++11
+CFLAGS = -Wall -Werror -Wextra -std=c++14
 
 all: build
 
